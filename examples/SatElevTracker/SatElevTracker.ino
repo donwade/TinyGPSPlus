@@ -114,7 +114,7 @@ void loop()
 
       if (nowLat != keepLat || nowLng != keepLng)
       {
-          Serial.printf("%8d %10.8f %10.8f \n", loopCtr, nowLat, nowLng);
+          Serial.printf("%8d %3d %10.8f %10.8f \n", loopCtr, satCount, nowLat, nowLng);
       }
   }
 
