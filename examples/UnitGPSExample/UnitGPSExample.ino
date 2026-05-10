@@ -3,10 +3,11 @@
  *
  *SPDX-License-Identifier: MIT
  */
+#include "M5Unified.h"
 
 #include "MultipleSatellite.h"
 
-static const int RXPin = 22, TXPin = 21;
+static const int RXPin = 13, TXPin = 27;
 
 //Be suitable for Unit GPS v1.1  https://docs.m5stack.com/en/unit/Unit-GPS%20v1.1
 //Be suitable for Unit GPS SMA   https://docs.m5stack.com/en/unit/Unit-GPS%20SMA
@@ -22,6 +23,23 @@ void displayInfo();
 
 void setup()
 {
+
+    m5::M5Unified::config_t cfg = M5.config();
+    //std::cout << "Type of cfg: " << typeid(cfg).name() << std::endl;
+
+    // Set the items you want to configure. Omit the following two lines if
+    cfg.serial_baudrate = 115200;
+    cfg.output_power = true;
+    cfg.output_power = true;
+
+    M5.begin(cfg);
+
+    M5.Power.setExtOutput(false);  // reset gps
+    delay(1000);
+    M5.Power.setExtOutput(true);    // restart gps
+
+//  -------------------------------------------------------
+
     Serial.begin(115200);
     gps.begin();
     gps.setSystemBootMode(BOOT_FACTORY_START);
@@ -58,7 +76,7 @@ void displayInfo()
     } else {
         Serial.print(F("INVALID\n"));
     }
-
+    
     Serial.print(F("  Date/Time: "));
     if (gps.date.isUpdated()) {
         Serial.print(gps.date.month());
@@ -71,6 +89,7 @@ void displayInfo()
     }
 
     Serial.print(F(" "));
+    
     if (gps.time.isUpdated()) {
         if (gps.time.hour() < 10) Serial.print(F("0"));
         Serial.print(gps.time.hour());
@@ -87,6 +106,7 @@ void displayInfo()
         Serial.print(F("INVALID"));
     }
 
+    Serial.println();
     Serial.println();
     delay(1000);
 }
