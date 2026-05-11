@@ -1,26 +1,49 @@
 #include <TinyGPSPlus.h>
 #include <SoftwareSerial.h>
+#include <M5Unified.h>
+#include <MultipleSatellite.h>
 /*
    This sample code demonstrates just about every built-in operation of TinyGPSPlus (TinyGPSPlus).
    It requires the use of SoftwareSerial, and assumes that you have a
    4800-baud serial GPS device hooked up on pins 4(rx) and 3(tx).
 */
-static const int RXPin = 4, TXPin = 3;
-static const uint32_t GPSBaud = 4800;
+static const int RXPin = 13, TXPin = 27;
+static const uint32_t GPSBaud = 115200;
 
+//static const int RXPin = 4, TXPin = 3;
+//static const uint32_t GPSBaud = 4800;
+
+#if 0
 // The TinyGPSPlus object
-TinyGPSPlus gps;
-
-// The serial connection to the GPS device
-SoftwareSerial ss(RXPin, TXPin);
+    TinyGPSPlus gps;
+    // The serial connection to the GPS device
+    SoftwareSerial ss(RXPin, TXPin);
+#else
+    // Create an instance of MultipleSatellite, assuming we use the Serial1 
+    MultipleSatellite gps(Serial1, GPSBaud, SERIAL_8N1, RXPin, TXPin);
+#endif
 
 // For stats that happen every 5 seconds
 unsigned long last = 0UL;
 
 void setup()
 {
+  m5::M5Unified::config_t cfg = M5.config();
+    //std::cout << "Type of cfg: " << typeid(cfg).name() << std::endl;
+
+    // Set the items you want to configure. Omit the following two lines if
+    cfg.serial_baudrate = 115200;
+    cfg.output_power = true;
+    cfg.output_power = true;
+
+    M5.begin(cfg);
+
+    M5.Power.setExtOutput(false);  // reset gps
+    delay(1000);
+    M5.Power.setExtOutput(true);    // restart gps
+
   Serial.begin(115200);
-  ss.begin(GPSBaud);
+  gps.begin();
 
   Serial.println(F("KitchenSink.ino"));
   Serial.println(F("Demonstrating nearly every feature of TinyGPSPlus"));
@@ -31,9 +54,12 @@ void setup()
 
 void loop()
 {
+
+  gps.updateGPS();
+  
   // Dispatch incoming characters
-  while (ss.available() > 0)
-    gps.encode(ss.read());
+  //while (gps.available() > 0)
+  //  gps.encode(gps.read());
 
   if (gps.location.isUpdated())
   {
